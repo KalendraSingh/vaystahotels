@@ -1,0 +1,667 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["omitApi"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id           String        @id @unique @default(uuid())
+  name         String
+  rank         Int
+  staffs       Staff[]
+  vendorStaffs VendorStaff[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model PermitedRoutes {
+  id            String       @id @unique @default(uuid())
+  routeName     String
+  route         String
+  staffId       String?
+  staff         Staff?       @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  vendorStaffId String?
+  vendorStaff   VendorStaff? @relation(fields: [vendorStaffId], references: [id], onDelete: Cascade)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @default(now())
+}
+
+model Staff {
+  id                   String           @id @unique @default(uuid())
+  email                String           @unique
+  phone                String           @unique
+  password             String
+  role                 Role             @relation(fields: [roleId], references: [id])
+  name                 String
+  lastName             String?
+  gender               String?
+  dob                  DateTime?        @db.Date
+  houseNo              String?
+  street               String?
+  pincode              Int?
+  city                 String?
+  state                String?
+  country              String?
+  refreshToken         String?
+  resetToken           String?          @unique
+  passwordResetExpires DateTime?
+  roleId               String
+  resetTokenExpiry     DateTime?        @default(now())
+  isVerifiedEmail      Boolean          @default(true)
+  isActive             Boolean          @default(true)
+  profileImage         String?
+  PermitedRoutes       PermitedRoutes[]
+  BlogPost             BlogPost[]
+  hotel                Hotel[]
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+}
+
+model Vendor {
+  id                   String               @id @unique @default(uuid())
+  email                String               @unique
+  password             String
+  hotels               Hotel[]
+  verification         VendorVerification[]
+  VendorPayment        VendorPayment[]
+  VendorPolicy         VendorHotelPolicy[]
+  bankKYC              BankKYC?
+  vendorStaffs         VendorStaff[]
+  name                 String
+  lastName             String?
+  agreeTerms           Boolean              @default(false)
+  gender               String?
+  dob                  DateTime?            @db.Date
+  phone                String               @unique
+  houseNo              String?
+  street               String?
+  pincode              Int?
+  city                 String?
+  state                String?
+  country              String?
+  refreshToken         String?
+  resetToken           String?              @unique
+  passwordResetExpires DateTime?
+  resetTokenExpiry     DateTime?            @default(now())
+  isActive             Boolean              @default(true)
+  isVerifiedEmail      Boolean              @default(false)
+  profileImage         String?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+}
+
+model VendorStaff {
+  id                   String           @id @unique @default(uuid())
+  email                String           @unique
+  phone                String           @unique
+  password             String
+  role                 Role             @relation(fields: [roleId], references: [id])
+  name                 String
+  lastName             String?
+  gender               String?
+  dob                  DateTime?        @db.Date
+  houseNo              String?
+  street               String?
+  pincode              Int?
+  city                 String?
+  state                String?
+  country              String?
+  refreshToken         String?
+  resetToken           String?          @unique
+  passwordResetExpires DateTime?
+  roleId               String
+  resetTokenExpiry     DateTime?        @default(now())
+  isVerifiedEmail      Boolean          @default(false)
+  isActive             Boolean          @default(true)
+  profileImage         String?
+  PermitedRoutes       PermitedRoutes[]
+  vendorId             String
+  vendor               Vendor           @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+}
+
+model VendorVerification {
+  id              String             @id @unique @default(uuid())
+  vendorId        String
+  vendor          Vendor             @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  status          VerificationStatus @default(PENDING)
+  rejectionReason String?
+  hotelName       String
+  address         String
+  city            String
+  state           String
+  pincode         String
+  gstNo           String?
+  aadharCardImage String
+  hotelImages     String[]
+  verifiedAt      DateTime?
+  rejectedReason  String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
+
+model VendorPayment {
+  id        String              @id @unique @default(uuid())
+  vendorId  String
+  vendor    Vendor              @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  amount    Float
+  hotelId   String?
+  method    String?
+  status    VendorPaymentStatus @default(PENDING)
+  isPaid    Boolean             @default(false)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}
+
+model Customer {
+  id                   String            @id @unique @default(uuid())
+  email                String            @unique
+  password             String
+  name                 String
+  lastName             String?
+  gender               String?
+  dob                  DateTime?         @db.Date
+  phone                String            @unique
+  houseNo              String?
+  street               String?
+  pincode              Int?
+  city                 String?
+  state                String?
+  country              String?
+  refreshToken         String?
+  resetToken           String?           @unique
+  passwordResetExpires DateTime?
+  resetTokenExpiry     DateTime?         @default(now())
+  isActive             Boolean           @default(true)
+  isVerifiedEmail      Boolean           @default(false)
+  profileImage         String?
+  bookings             Booking[]
+  guest                Guest[]
+  hotel                Hotel[]
+  ReviewAndRating      ReviewAndRating[]
+  favoriteHotel        FavoriteHotel[]
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+}
+
+model CityAddress {
+  id           String   @id @unique @default(uuid())
+  city         String
+  state        String
+  cityImage    String
+  cityAvgPrice Float?
+  country      String?
+  landmark     String?
+  location     String?
+  latitude     String?
+  longitude    String?
+  zipcode      String?
+  hotels       Hotel[]
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Hotel {
+  id              String              @id @unique @default(uuid())
+  type            String?
+  name            String
+  city            String
+  state           String
+  country         String
+  zipcode         String
+  landmark        String?
+  location        String?
+  vendorId        String?
+  description     String?
+  avgPrice        Float?
+  bannerImage     String?
+  vendor          Vendor?             @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  rooms           Room[]
+  RoomCategories  RoomCategory[]
+  ReviewAndRating ReviewAndRating[]
+  hotelImages     HotelImage[]
+  bookings        Booking[]
+  favoriteBy      FavoriteHotel[]
+  hotelPolicy     VendorHotelPolicy[]
+  amenities       Json[]
+  features        Json[]
+  distanceFrom    Json[]
+  Customer        Customer?           @relation(fields: [customerId], references: [id])
+  customerId      String?
+  Staff           Staff?              @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  staffId         String?
+  isActive        Boolean             @default(false)
+  isPaid          Boolean             @default(false)
+  CityAddress     CityAddress?        @relation(fields: [cityAddressId], references: [id])
+  cityAddressId   String?
+  latitude        String?
+  longitude       String?
+  phone           String?
+  email           String?
+  website         String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+}
+
+model HotelImage {
+  id        String   @id @unique @default(uuid())
+  hotelId   String
+  category  String
+  imageUrls String[]
+  Hotel     Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RoomCategory {
+  id              String      @id @unique @default(uuid())
+  category        String
+  categoryImage   String[]
+  bedType         String
+  adultCount      String
+  roomSize        String
+  description     String
+  price           Float
+  discount        Float?
+  discountedPrice Float
+  perGuestPrice   Int?
+  amenities       Json[]
+  rooms           Room[]
+  roomImages      RoomImage[]
+  hotelId         String?
+  Hotel           Hotel?      @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Room {
+  id             String        @id @unique @default(uuid())
+  hotelId        String
+  hotel          Hotel         @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  isAvailable    Boolean       @default(true)
+  isActive       Boolean       @default(true)
+  roomNo         String?
+  roomCategoryId String?
+  RoomCategory   RoomCategory? @relation(fields: [roomCategoryId], references: [id], onDelete: Cascade)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model RoomImage {
+  id             String        @id @unique @default(uuid())
+  category       String
+  imageUrls      String[]
+  RoomCategory   RoomCategory? @relation(fields: [roomCategoryId], references: [id])
+  roomCategoryId String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model RoomAmenities {
+  id        String   @id @unique @default(uuid())
+  amenities Json[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model HotelAmenities {
+  id        String   @id @unique @default(uuid())
+  amenities Json[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FavoriteHotel {
+  id         String    @id @unique @default(uuid())
+  Hotel      Hotel?    @relation(fields: [hotelId], references: [id])
+  hotelId    String?
+  Customer   Customer? @relation(fields: [customerId], references: [id])
+  customerId String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([customerId, hotelId])
+}
+
+model ReviewAndRating {
+  id         String   @id @unique @default(uuid())
+  rating     Int
+  comment    String?
+  hotelId    String
+  hotel      Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String
+  isActive   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Guest {
+  id          String    @id @unique @default(uuid())
+  name        String
+  email       String
+  phone       String
+  gstNumber   String?
+  companyName String?
+  gender      String?
+  address     String?
+  country     String?
+  Customer    Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model CartItem {
+  id             String          @id @unique @default(uuid())
+  customerId     String
+  hotelId        String
+  startDate      DateTime
+  endDate        DateTime
+  nights         Int
+  totalAmount    Float
+  totalDiscount  Float
+  amountWithGst  Float
+  payAmount      Float
+  roomSelections RoomSelection[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model RoomSelection {
+  id             String   @id @unique @default(uuid())
+  roomCategoryId String
+  categoryName   String
+  roomCount      Int
+  adultCount     Int
+  cartItemId     String
+  CartItem       CartItem @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+}
+
+model Booking {
+  id           String        @id @unique @default(uuid())
+  customerId   String
+  adultCount   Int
+  roomCount    Int
+  checkIn      DateTime
+  checkOut     DateTime
+  roomDetails  Json[]
+  status       BookingStatus @default(PENDING)
+  cancelReason String?
+  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  payment      Payment[]
+  Hotel        Hotel?        @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  hotelId      String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Payment {
+  id             String        @id @unique @default(uuid())
+  amount         Float
+  paid_amount    Float?
+  due_amount     Float?
+  gstAmount      Float?
+  discountAmount Float?
+  method         String
+  status         PaymentStatus @default(PENDING)
+  bookingId      String
+  booking        Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model BankKYC {
+  id String @id @unique @default(uuid())
+
+  // Personal Identification
+  firstName       String
+  lastName        String
+  fatherFirstName String
+  fatherLastName  String
+  maritalStatus   String
+  gender          String
+  dateOfBirth     DateTime
+  nationality     String
+
+  // Contact Information
+  email          String  @unique
+  phoneNumber    String  @unique
+  addressStreet  String
+  addressStreet2 String?
+  city           String
+  state          String
+  postalCode     String
+  country        String
+
+  // Bank Account Details
+  bankName          String
+  branchName        String
+  accountNumber     String @unique
+  ifscCode          String
+  accountHolderName String
+
+  // Tax Information
+  pancardNumber String  @unique
+  gstNumber     String? @unique
+  taxResidency  String?
+
+  // Identity Documents
+  aadharNumber   String? @unique
+  passportNumber String? @unique
+  drivingLicense String? @unique
+
+  // Document Verification
+  pancardDocument        String?
+  aadharDocuments        String[] // Store multiple Aadhar document images as an array
+  passportDocument       String?
+  drivingLicenseDocument String?
+  gstDocument            String?
+
+  // Declaration Details
+  declarationFirstName String
+  declarationLastName  String
+  signature            String? // Store path to the signature file
+
+  // KYC Status
+  kycStatus          KYCStatus @default(PENDING)
+  kycSubmittedAt     DateTime?
+  kycVerifiedAt      DateTime?
+  kycRejectedAt      DateTime?
+  kycRejectionReason String?
+
+  // Compliance Information
+  amlCompliance      Boolean @default(true)
+  fraudCheck         Boolean @default(true)
+  sanctionsListCheck Boolean @default(true)
+
+  // Relation to Vendor
+  vendor   Vendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  vendorId String @unique
+
+  // Audit Fields
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VendorHotelPolicy {
+  id                     String                 @id @unique @default(uuid())
+  checkInTime            DateTime
+  checkOutTime           DateTime
+  childrenPolicy         Boolean                @default(true)
+  localId                Boolean                @default(true)
+  coupleFriendly         Boolean                @default(true)
+  foreignGuests          Boolean                @default(true)
+  workWithChannelManager Boolean                @default(false)
+  payAtHotel             Boolean                @default(true)
+  ownershipDocument      String[]
+  propertyImage          String[]
+  cancellationPolicy     Boolean                @default(true)
+  nonRefundable          Boolean                @default(true)
+  ownershipType          String
+  policyStatus           PolicyStatus           @default(PENDING)
+  policyRejectionReason  String?
+  additionalPolicies     String?
+  channelManagerDetails  ChannelManagerDetails?
+  Vendor                 Vendor?                @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  vendorId               String?
+  Hotel                  Hotel?                 @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  hotelId                String?
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+}
+
+model ChannelManagerDetails {
+  id                  String            @id @unique @default(uuid())
+  companyName         String?
+  contactPerson       String?
+  email               String?           @unique
+  phone               String?
+  vendorHotelPolicy   VendorHotelPolicy @relation(fields: [vendorHotelPolicyId], references: [id], onDelete: Cascade)
+  vendorHotelPolicyId String            @unique
+}
+
+model Inquiry {
+  id        String        @id @unique @default(uuid())
+  name      String
+  lastName  String
+  email     String
+  phone     String
+  message   String?
+  status    InquiryStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model BlogPost {
+  id            String             @id @unique @default(uuid())
+  title         String
+  description   String
+  slug          String             @unique
+  excerpt       String?
+  featuredImage String?
+  published     Boolean            @default(false)
+  publishedAt   DateTime?
+  authorId      String
+  Author        Staff              @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categories    BlogPostCategory[]
+  tags          BlogPostTag[]
+  comments      Comment[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@index([slug])
+  @@index([authorId])
+}
+
+model Category {
+  id        String             @id @unique @default(uuid())
+  name      String             @unique
+  slug      String             @unique
+  posts     BlogPostCategory[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model Tag {
+  id        String        @id @unique @default(uuid())
+  name      String        @unique
+  slug      String        @unique
+  posts     BlogPostTag[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model Comment {
+  id        String   @id @unique @default(uuid())
+  comment   String
+  postId    String
+  BlogPost  BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BlogPostCategory {
+  blogPostId String
+  categoryId String
+  BlogPost   BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  Category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([blogPostId, categoryId])
+}
+
+model BlogPostTag {
+  blogPostId String
+  tagId      String
+  BlogPost   BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  Tag        Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([blogPostId, tagId])
+}
+
+model Otp {
+  id        Int      @id @default(autoincrement())
+  phone     String?
+  email     String?
+  otp       Int
+  createdAt DateTime @default(now())
+  attempts  Int      @default(0)
+}
+
+enum BookingStatus {
+  PENDING
+  FAILED
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELED
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum VendorPaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  ADVANCED
+  DUE
+  REFUNDED
+}
+
+enum KYCStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  IN_PROGRESS
+}
+
+enum PolicyStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+}
+
+enum InquiryStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
