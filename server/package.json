@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "build": "esbuild server.js --bundle --platform=node --outdir=dist --format=esm --packages=external"
+    "build": "prisma generate && npx esbuild server.js --bundle --platform=node --outdir=dist --format=esm --packages=external"
   },
   "keywords": [],
   "author": "",
